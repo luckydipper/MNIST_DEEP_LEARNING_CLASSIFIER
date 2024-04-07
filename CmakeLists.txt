@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.15)
+project(mnist_deep_learning_classifier)
+find_package(OpenCV REQUIRED)
+
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+link_directories(${Eigen_INCLUDE_DIRS})
+
+add_executable(mnist_deep_learning_classifier.out src/main.cpp)
