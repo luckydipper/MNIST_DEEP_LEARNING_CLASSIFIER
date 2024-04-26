@@ -1,3 +1,4 @@
 /build/* 
 /dataset/test/*
 /dataset/train/*
+.DS_Store
