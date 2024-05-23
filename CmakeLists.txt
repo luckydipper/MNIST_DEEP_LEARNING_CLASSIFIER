@@ -1,14 +1,17 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.16.3)
 
-project(mnist_deep_learning_classifier
-        VERSION 0.0.0
-        DESCRIPTIOIN "bottom-up deep learning classifier using c++."
-        HOMPAGE_URL "https://github.com/luckydipper"
+set(PROJECT_NAME mnist_deep_learning_classifier)
+set(PROJECT_VERSION 0.0.0)
+
+project(${PROJECT_NAME}
+        VERSION ${PROJECT_VERSION}
         LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+#set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=-*,google-readability-casting;-fix;-fix-errors;")
 
 IF(APPLE)
 # Fix linking on 10.14+. See https://stackoverflow.com/questions/54068035
@@ -22,33 +25,11 @@ link_directories(${Eigen_INCLUDE_DIRS})
 
 add_executable(mnist_deep_learning_classifier.out src/main.cpp src/mnists_parser.cpp)
 
-
-
 ################## TEST #####################
 #option(MNIST_CLASSIFIER_TEST "Build test" ON)
 #if(MNIST_CLASSIFIER_TEST)
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/03597a01ee50ed33e9dfd640b249b4be3799d395.zip
-)
-# For Windows: Prevent overriding the parent project's compiler/linker settings
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
 enable_testing()
-
-add_executable(
-  test/hello_test
-  test/hello_test.cc
-)
-target_link_libraries(
-  test/hello_test
-  GTest::gtest_main
-)
-
-include(GoogleTest)
-gtest_discover_tests(test/hello_test)
+add_subdirectory(tests)
 
 
 ################### INSTALL/EXPORT #############
