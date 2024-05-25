@@ -6,11 +6,14 @@ FetchContent_Declare(
 # For Windows: Prevent overriding the parent project's compiler/linker settings
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
+add_definitions(-DCMAKE_SOURCE_DIR=\"${CMAKE_SOURCE_DIR}\")
+
+file(GLOB TEST_SOURCES "*.cpp")
 
 add_executable(
   hello_test
-  hello_test.cc
-  testParser.cpp
+  ${TEST_SOURCES}
+  ${CMAKE_SOURCE_DIR}/src/mnists_parser.cpp
 )
 
 target_link_libraries(
