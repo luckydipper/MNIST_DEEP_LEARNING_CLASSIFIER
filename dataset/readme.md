@@ -1,4 +1,10 @@
 This file should be this structure. 
+link : https://www.kaggle.com/datasets/hojjatk/mnist-dataset
+
+(28x28 images), between 0-255
+Number of training samples: 60000
+Number of testing samples: 10000
+
 ```
 % tree dataset
 dataset
