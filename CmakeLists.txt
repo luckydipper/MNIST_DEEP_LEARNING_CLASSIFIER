@@ -20,7 +20,8 @@ ENDIF()
 
 find_package(OpenCV REQUIRED)
 
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+include_directories(${OpenCV_INCLUDE_DIRS} 
+                    ${CMAKE_CURRENT_SOURCE_DIR}/include)
 link_directories(${Eigen_INCLUDE_DIRS})
 
 add_executable(mnist_deep_learning_classifier.out src/main.cpp src/mnists_parser.cpp)
