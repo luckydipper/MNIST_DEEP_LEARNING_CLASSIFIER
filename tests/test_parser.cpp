@@ -13,7 +13,13 @@ TEST(mnists_parser, size_test){
 
   EXPECT_EQ(train_X.size(), train_y.size());
   EXPECT_EQ(test_X.size(), test_y.size());
-  
+  int idx = 4;
+  for (int i = 0; i < 28 * 28; i++) {
+    if ((i % 28) == 0) cout << "\n";
+    cout << train_X[idx][i] << " ";
+  }
+  cout << "y : " << train_y[idx];
+
 }
 
 TEST(HelloTest, BasicAssertions) {

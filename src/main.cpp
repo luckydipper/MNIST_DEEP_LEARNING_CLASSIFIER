@@ -16,12 +16,4 @@ int main() {
   vector<vector<unsigned char>> test_X = getInputImgs(test_X_path);
   vector<int> test_y = getLabels(test_y_path);
 
-  // for (const vector<unsigned char> &image : train_X) {
-  //   for (int i = 0; i < 28 * 28; i++) {
-  //     if ((i % 28) == 0) cout << "\n";
-  //     cout << image[i] << " ";
-  //   }
-  // }
-  cout << train_X.size() << ", " << train_y.size() << "\n";
-  cout << test_X.size() << ", " << test_y.size() << "\n";
 }
