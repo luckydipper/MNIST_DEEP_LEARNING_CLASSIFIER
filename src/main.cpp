@@ -83,6 +83,45 @@ struct ReLU : public ModelInterface {
     return masked_out;
   };
 };
+// 
+Eigen::MatrixXd softmaxRowwise(const Eigen::MatrixXd& mat) {
+    Eigen::MatrixXd result(mat.rows(), mat.cols());
+
+    // 각 행에 대해 소프트맥스 적용
+    for (int i = 0; i < mat.rows(); ++i) {
+        // 각 행의 최대값을 빼서 수치적으로 안정화
+        double maxCoeff = mat.row(i).maxCoeff();
+        Eigen::VectorXd expRow = (mat.row(i).array() - maxCoeff).exp();
+        result.row(i) = expRow / expRow.sum();
+    }
+
+    return result;
+}
+double crossEntropyLoss(const Eigen::MatrixXd& predictions, const Eigen::MatrixXd& groundTruth) {
+    Eigen::MatrixXd logPredictions = predictions.array().log();
+    double loss = -(groundTruth.array() * logPredictions.array()).sum();
+    return loss;
+}
+// pure virtual을 쓰면 forward의 ouput이 double 이 될 수 가 없네?
+struct SoftmaxLoss {
+  SoftmaxLoss() = default;
+  Eigen::MatrixXd ground_truth, predict;
+  double loss;
+  int batch_size;
+  double forward(const Eigen::MatrixXd &X, const Eigen::MatrixXd &gt) {
+    assert(X.rows() == gt.rows() && X.cols() == gt.cols());
+    batch_size = X.rows();
+    Eigen::MatrixXd y_hat = softmaxRowwise(X);
+    ground_truth = gt, predict = y_hat;
+    loss = crossEntropyLoss(y_hat, ground_truth);
+
+    return loss;
+  };
+
+  Eigen::MatrixXd backward(double delta = 1) {
+    return (ground_truth-predict).array()/ batch_size;
+  };
+};
 
 } // namespace neural
 
@@ -129,5 +168,8 @@ int main() {
   lnas.backward(Eigen::MatrixXd::Ones(num_batch, 18));
   neural::ReLU rl1{};
   rl1.forward(result);
-  cout << "\n\n" << result << "\n\n" << rl1.mask << "\n\n" << rl1.backward(result);
+  cout << "\n\n"
+       << result << "\n\n"
+       << rl1.mask << "\n\n"
+       << rl1.backward(result);
 }
