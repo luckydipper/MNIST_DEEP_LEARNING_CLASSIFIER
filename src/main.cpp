@@ -203,15 +203,15 @@ int main() {
 
   // model definition
   const int flatten_img_size = 28 * 28;
-  const int in_out_size[] = {400, 200, 50, 10};
+  const int in_out_size[] = {400, 300, 100, 10};
   neural::Linear l1{flatten_img_size, in_out_size[0]},
       l2{in_out_size[0], in_out_size[1]}, l3{in_out_size[1], in_out_size[2]},
       l4{in_out_size[2], in_out_size[3]};
   neural::ReLU act1{}, act2{}, act3{}, act4{};
   neural::SoftmaxLoss sft{};
 
-  const int num_batch = 5;//, num_input = 16, num_out = 18;
-  const double lr = 0.0001;
+  const int num_batch = 16;//, num_input = 16, num_out = 18;
+  const double lr = 0.003;
 
   vector<MatrixXd> imgs_iter = createImageBatches(train_X, num_batch);
   vector<MatrixXd> lable_iter = createLabelBatches(train_y, num_batch);
@@ -239,7 +239,7 @@ int main() {
     auto b8 = act1.backward(b7);
     auto b9 = l1.backward(b8);
     vector<neural::Linear *> layers = {&l1, &l2, &l3, &l4};
-    for (auto layer : layers) {
+    for (auto &layer : layers) {
       layer->weight.array() -= lr * layer->delta_weight.array();
       layer->bias.array() -= lr * layer->delta_bias.array();
     }
