@@ -26,7 +26,7 @@ Eigen::MatrixXd createHeWeight(int rows, int cols) {
 struct ModelInterface {
   ModelInterface() { ; };
   virtual Eigen::MatrixXd forward(const Eigen::MatrixXd &X) = 0;
-  // virtual Eigen::MatrixXd backward(void) = 0;
+  virtual Eigen::MatrixXd backward(const Eigen::MatrixXd &delta_out) = 0;
 };
 
 // bias term은 default로 존재.
@@ -34,7 +34,7 @@ struct Linear : public ModelInterface {
   const int input_size, output_size;
   Eigen::MatrixXd weight, delta_weight;
   Eigen::VectorXd bias, delta_bias;
-  Eigen::MatrixXd input_data;
+  Eigen::MatrixXd input_data, delta_input;
   explicit Linear(const int input_size, const int output_size)
       : input_size(input_size), output_size(output_size),
         weight(createHeWeight(input_size, output_size)),
@@ -45,19 +45,20 @@ struct Linear : public ModelInterface {
 
   Eigen::MatrixXd forward(const Eigen::MatrixXd &X) override {
     assert(X.cols() == weight.rows() && "forward errror.");
-    cout << "X: \n"
-         << X << "\nweight: " << weight << "\nbias: " << bias << "\n result: ";
     input_data = X;
+
     Eigen::MatrixXd zero_passing = X * weight;
     zero_passing.rowwise() += bias.transpose();
     return zero_passing;
   }
+
+  Eigen::MatrixXd backward(const Eigen::MatrixXd &delta_out) override{
+    delta_input = delta_out * weight.transpose();
+    delta_bias = delta_out.rowwise().sum();
+    delta_weight = input_data.transpose() * delta_out;
+    return delta_input;
+  }
 };
-
-// struct FullConClassifyModel{
-
-//   FullConClassifyModel(std::initializer_list<> s){;};
-// };
 
 } // namespace neural
 
@@ -96,25 +97,11 @@ int main() {
   neural::Linear l1{flatten_img_size, in_out_size[0]},
       l2{in_out_size[0], in_out_size[1]}, l3{in_out_size[1], in_out_size[2]};
 
-  // MatrixXd a = convertToEigenMatrix(train_X[0],28*28,1);
-  // l1.forward(a);
+  const int num_batch = 5, num_input = 16, num_out =18;
+  neural::Linear lnas{num_input, num_out};
 
-  neural::Linear lnas{4 * 4, 4 * 4};
-  MatrixXd bac = MatrixXd::Ones(5, 16);
+  MatrixXd bac = MatrixXd::Ones(num_batch, num_input);
   MatrixXd result = lnas.forward(bac);
-  // Softmax softmax_l(in_out_size[2], in_out_size[3]);
-
-  // Model fcn{l1, l2, l3, softmax_l};
-  // y_hat = fcn(X);
-  // Loss loss(gt, y_hat) // predicted 결과 나옴 forwawad -> computation graph
-  // 만듬
-
-  //     vector<int>
-  //         aa = {2, 31, 4, 1, 53, 2, 14, 1, 1, 2, 23, 4, 23};
-  // const int num_batch = 20;
-
-  // // DataLoader num_batch
-  // for (int i = 0; i < aa.size(); i += num_batch) {
-  //   // eigen 으로 변환
-  // }
+  lnas.backward(Eigen::MatrixXd::Ones(num_batch, 18));
+  cout << "\n\n" << lnas.delta_weight << "\n\n" << lnas.delta_bias << "\n\n" << lnas.delta_input;
 }
