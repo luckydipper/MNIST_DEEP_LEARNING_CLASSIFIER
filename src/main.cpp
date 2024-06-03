@@ -52,12 +52,36 @@ struct Linear : public ModelInterface {
     return zero_passing;
   }
 
-  Eigen::MatrixXd backward(const Eigen::MatrixXd &delta_out) override{
+  Eigen::MatrixXd backward(const Eigen::MatrixXd &delta_out) override {
     delta_input = delta_out * weight.transpose();
     delta_bias = delta_out.rowwise().sum();
     delta_weight = input_data.transpose() * delta_out;
     return delta_input;
   }
+};
+
+struct ReLU : public ModelInterface {
+  Eigen::MatrixXi mask;
+
+  ReLU() = default;
+  Eigen::MatrixXd forward(const Eigen::MatrixXd &X) override {
+    Eigen::MatrixXd masked_input = X;
+    mask = Eigen::MatrixXi::Ones(X.rows(), X.cols());
+    for (int i = 0; i < X.rows(); i++)
+      for (int j = 0; j < X.cols(); j++)
+        if (X(i, j) <= 0)
+          masked_input(i, j) = mask(i, j) = 0;
+    return masked_input;
+  };
+
+  Eigen::MatrixXd backward(const Eigen::MatrixXd &delta_out) override {
+    Eigen::MatrixXd masked_out = delta_out;
+    for (int i = 0; i < delta_out.rows(); ++i)
+      for (int j = 0; j < delta_out.cols(); ++j)
+        if (mask(i, j) == 0)
+          masked_out(i, j) = 0.;
+    return masked_out;
+  };
 };
 
 } // namespace neural
@@ -97,11 +121,13 @@ int main() {
   neural::Linear l1{flatten_img_size, in_out_size[0]},
       l2{in_out_size[0], in_out_size[1]}, l3{in_out_size[1], in_out_size[2]};
 
-  const int num_batch = 5, num_input = 16, num_out =18;
+  const int num_batch = 5, num_input = 16, num_out = 18;
   neural::Linear lnas{num_input, num_out};
 
   MatrixXd bac = MatrixXd::Ones(num_batch, num_input);
   MatrixXd result = lnas.forward(bac);
   lnas.backward(Eigen::MatrixXd::Ones(num_batch, 18));
-  cout << "\n\n" << lnas.delta_weight << "\n\n" << lnas.delta_bias << "\n\n" << lnas.delta_input;
+  neural::ReLU rl1{};
+  rl1.forward(result);
+  cout << "\n\n" << result << "\n\n" << rl1.mask << "\n\n" << rl1.backward(result);
 }
