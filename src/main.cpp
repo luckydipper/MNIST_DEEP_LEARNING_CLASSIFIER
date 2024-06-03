@@ -120,7 +120,7 @@ struct SoftmaxLoss {
   };
 
   Eigen::MatrixXd backward(double delta = 1) {
-    return (ground_truth - predict).array() / batch_size;
+    return (predict-ground_truth).array() / batch_size; //predict에서 gt를 빼야함.
   };
 };
 
@@ -211,7 +211,7 @@ int main() {
   neural::SoftmaxLoss sft{};
 
   const int num_batch = 5;//, num_input = 16, num_out = 18;
-  const double lr = 0.003;
+  const double lr = 0.0001;
 
   vector<MatrixXd> imgs_iter = createImageBatches(train_X, num_batch);
   vector<MatrixXd> lable_iter = createLabelBatches(train_y, num_batch);
